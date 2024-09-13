@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14.8-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+      POSTGRES_HOST: db
+      POSTGRES_IP: db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      default:
+        aliases:
+          - db
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - SHORTER_DB_NAME=test
+      - SHORTER_DB_USER=test 
+      - SHORTER_DB_HOSTNAME=db
+      - SHORTER_DB_PASSWORD=test 
+      - USE_DB=true
+    depends_on:
+      - db 
+    ports:
+      - "8080:8080"
+    networks:
+      - default
+
+networks:
+  default:
+    name: shorter_net
